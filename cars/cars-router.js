@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const cars = await db("cars")
+    const cars = await db("new_cars")
 
     res.json(cars)
   } catch (err) {
@@ -13,18 +13,25 @@ router.get("/", async (req, res, next) => {
   }
 })
 
+router.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const car = await db("new_cars").where({ id }).first()
+
+    res.json(car)
+  } catch(err) {
+    next(err)
+  }
+})
+
 router.post("/", async (req, res, next) => {
   try {
-    const payload = {
-      vin: req.body.vin,
-      make: req.body.make,
-      model: req.body.model,
-      mileage: req.body.mileage,
-    };
-    const [carID] = await db.insert(payload).into("cars")
-    const car = await db.first("*").from("cars").where("id", carID)
-    res.json(201).json(car)
-  } catch (err) {
+    const carData = req.body
+    const [id] = await db("new_cars").insert(carData)
+    const newCar = await db("new_cars").where({ id })
+
+    res.status(201).json(newCar)
+  } catch(err) {
     next(err)
   }
 })
